@@ -11,18 +11,18 @@ export function signJwt(object: Object, options?: jwt.SignOptions | undefined) {
   });
 }
 
-function verifyJwt(token: string) {
+export function verifyJwt(token: string) {
   try {
     const decoded = jwt.verify(token, publicKey);
     return {
       valid: true,
-      exprired: false,
+      expired: false,
       decoded,
     };
   } catch (e: any) {
     return {
       valid: false,
-      exprired: e.message === "jwt expired",
+      expired: e.message === "jwt expired",
       decoded: null,
     };
   }
