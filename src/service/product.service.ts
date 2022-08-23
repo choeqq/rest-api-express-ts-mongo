@@ -12,7 +12,7 @@ export async function createProduct(
   return ProductModel.create(input);
 }
 
-export async function addProduct(
+export async function findProduct(
   query: FilterQuery<ProductDocument>,
   options: QueryOptions = { lean: true }
 ) {
