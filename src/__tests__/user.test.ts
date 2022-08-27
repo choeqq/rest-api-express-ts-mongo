@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import * as UserService from "../service/user.service";
+import * as SessionService from "../service/session.service";
 import supertest from "supertest";
 import createServer from "../utils/server";
+import { createUserSessionHandler } from "../controller/session.controller";
 
 const app = createServer();
 
@@ -18,6 +20,16 @@ export const userInput = {
   name: "John Doe",
   password: "Password123",
   passwordConfirmation: "Password123",
+};
+
+const sessionPayload = {
+  _id: new mongoose.Types.ObjectId().toString(),
+  user: userId,
+  valid: true,
+  userAgent: "PostmanRuntime/7.28.4",
+  createdAt: new Date("2022-08-27T17:31:07.674Z"),
+  updatedAt: new Date("2022-08-27T17:31:07.674Z"),
+  __v: 0,
 };
 
 describe("user", () => {
@@ -79,7 +91,41 @@ describe("user", () => {
 
   describe("create user session", () => {
     describe("given the username and password are valid", () => {
-      it("should return a signed accesToken & refreshToken");
+      it("should return a signed accesToken & refreshToken", async () => {
+        jest
+          .spyOn(UserService, "validatePassword")
+          // @ts-ignore
+          .mockReturnValue(userPayload);
+
+        jest
+          .spyOn(SessionService, "createSession")
+          // @ts-ignore
+          .mockReturnValue(sessionPayload);
+
+        const req = {
+          get: () => {
+            return "a user agent";
+          },
+          body: {
+            email: "test@example.com",
+            password: "Password123",
+          },
+        };
+
+        const send = jest.fn();
+
+        const res = {
+          send,
+        };
+
+        // @ts-ignore
+        await createUserSessionHandler(req, res);
+
+        expect(send).toHaveBeenCalledWith({
+          accessToken: expect.any(String),
+          refreshToken: expect.any(String),
+        });
+      });
     });
   });
   // the username and password get validation
