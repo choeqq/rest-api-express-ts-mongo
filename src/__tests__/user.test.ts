@@ -61,7 +61,19 @@ describe("user", () => {
     });
 
     describe("given the user service throws", () => {
-      it("should a 409 error", () => {});
+      it("should a 409 error", async () => {
+        const createUserServiceMock = jest
+          .spyOn(UserService, "createUser")
+          .mockRejectedValue("oh no :(");
+
+        const { statusCode } = await supertest(app)
+          .post("/api/users")
+          .send(userInput);
+
+        expect(statusCode).toBe(409);
+
+        expect(createUserServiceMock).toHaveBeenCalled();
+      });
     });
   });
 
